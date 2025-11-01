@@ -2,34 +2,45 @@
 
 
 
-WG Working Group                                              Y. N. Here
-Internet-Draft                                    Your Organization Here
-Intended status: Standards Track                         1 November 2025
+Inter-Domain Routing                                          M. Matejka
+Internet-Draft                                                    CZ.NIC
+Updates: 4271 (if approved)                              1 November 2025
+Intended status: Standards Track                                        
 Expires: 5 May 2026
 
 
                      Scrubbing BGP ORIGIN Attribute
-                  draft-todo-yourname-protocol-latest
+              draft-marenamat-idr-scrub-bgp-origin-latest
 
 Abstract
 
-   TODO Abstract
+   The BGP Origin attribute in its original meaning has been out of use
+   for years.  Yet, the BGP Origin attribute has high priority in the
+   best route selection algorithm, right after the AS Path length, and
+   it's being used inconsistently over the Internet to manipulate the
+   route preference.
+
+   This document updates RFC 4271 by making the BGP Origin attribute
+   half-optional and explicitly allowing its scrubbing to zero (IGP).
 
 About This Document
 
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at
-   https://example.com/LATEST.  Status information for this document may
-   be found at https://datatracker.ietf.org/doc/draft-todo-yourname-
-   protocol/.
+   https://marenamat.github.io/ietf-draft-marenamat-idr-scrub-bgp-
+   origin/draft-marenamat-idr-scrub-bgp-origin.html.  Status information
+   for this document may be found at https://datatracker.ietf.org/doc/
+   draft-marenamat-idr-scrub-bgp-origin/.
 
-   Discussion of this document takes place on the WG Working Group
-   mailing list (mailto:WG@example.com), which is archived at
-   https://example.com/WG.
+   Discussion of this document takes place on the Inter-Domain Routing
+   Working Group mailing list (mailto:idr@ietf.org), which is archived
+   at https://mailarchive.ietf.org/arch/browse/idr/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/idr/.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/USER/REPO.
+   https://github.com/marenamat/ietf-draft-marenamat-idr-scrub-bgp-
+   origin.
 
 Status of This Memo
 
@@ -66,9 +77,11 @@ Table of Contents
 
    1.  Introduction
    2.  Conventions and Definitions
-   3.  Security Considerations
-   4.  IANA Considerations
-   5.  Normative References
+   3.  Tolerance of missing or malformed BGP Origin attribute
+   4.  Update to the BGP Origin attribute values
+   5.  Security Considerations
+   6.  IANA Considerations
+   7.  Normative References
    Acknowledgments
    Author's Address
 
@@ -84,20 +97,55 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-3.  Security Considerations
+3.  Tolerance of missing or malformed BGP Origin attribute
+
+   Unless explicitly configured by a network operator to do otherwise,
+   if the ORIGIN attribute has an undefined value, BGP speakers SHOULD
+   replace it by a value of 0 (IGP).
+
+   BGP speakers SHOULD NOT generate UPDATE Message Errors with the
+   subcode 6, Invalid ORIGIN Attribute.
+
+   Per the above specification, this document updates Section 4.5 of
+   [RFC4271] by accepting routes without the ORIGIN attribute.
+
+4.  Update to the BGP Origin attribute values
+
+   The values of the BGP Origin attributed are originally specified in
+   Section 4.3 of [RFC4271], the Path attribute part, a) ORIGIN (Type
+   Code 1).
+
+   Unless explicitly configured by a network operator to do otherwise,
+   BGP speakers MUST NOT advertise BGP UPDATE messages with the ORIGIN
+   attribute containing any other value than 0 (IGP), including manually
+   configured static routes.
+
+   Additionally, BGP speakers MAY rewrite any ORIGIN attribute value to
+   0 (IGP) if they contain any other value.
+
+   Per the above specification, this document updates Section 4.3 of
+   [RFC4271] by deprecating ORIGIN attribute values 1 (EGP) and 2
+   (INCOMPLETE), and Section 5.1.1 of [RFC4271].
+
+5.  Security Considerations
 
    TODO Security
 
-4.  IANA Considerations
+6.  IANA Considerations
 
    This document has no IANA actions.
 
-5.  Normative References
+7.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC4271]  Rekhter, Y., Ed., Li, T., Ed., and S. Hares, Ed., "A
+              Border Gateway Protocol 4 (BGP-4)", RFC 4271,
+              DOI 10.17487/RFC4271, January 2006,
+              <https://www.rfc-editor.org/rfc/rfc4271>.
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
@@ -109,6 +157,9 @@ Acknowledgments
 
 Author's Address
 
-   Your Name Here
-   Your Organization Here
-   Email: your.email@example.com
+   Maria Matejka
+   CZ.NIC
+   Milesovska 1136/5
+   13000 Praha
+   Czechia
+   Email: maria.matejka@nic.cz, mq@jmq.cz
