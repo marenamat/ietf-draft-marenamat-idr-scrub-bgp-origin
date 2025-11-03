@@ -1256,11 +1256,25 @@ specified by <span>[<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>. It
 UPDATE message at all.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">Unless explicitly configured by a network operator to do otherwise,
 if the ORIGIN attribute is malformed or absent, BGP speakers <span class="bcp14">SHOULD</span>
-accept such UPDATE message and replace the ORIGIN attribute
-by a value of 0 (IGP).<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">Per the above specification, this document updates
+accept such UPDATE message. In such case, before the path attributes are processed any further:<a href="#section-3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-3.1">
+          <p id="section-3-3.1.1">If the ORIGIN attribute is absent, the BGP speaker <span class="bcp14">MUST</span> add a new ORIGIN attribute
+with the value of 0 (IGP).<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-3-3.2">
+          <p id="section-3-3.2.1">If the ORIGIN attribute length is not 1, the BGP speaker <span class="bcp14">MUST</span> replace that
+attribute with a new ORIGIN attribute with the value of 0 (IGP).<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-3-3.3">
+          <p id="section-3-3.3.1">If the ORIGIN attribute value is not 0 (IGP), the BGP speaker <span class="bcp14">SHOULD</span> rewrite
+that value to 0 (IGP).<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-3-4">The BGP speaker <span class="bcp14">SHOULD</span> allow logging the original ORIGIN attribute value.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">Per the above specification, this document updates
 <span><a href="https://rfc-editor.org/rfc/rfc7606#section-7.1" class="relref">Section 7.1</a> of [<a href="#RFC7606" class="cite xref">RFC7606</a>]</span>
-by accepting routes with a malformed or absent ORIGIN attribute.<a href="#section-3-3" class="pilcrow">¶</a></p>
+by accepting routes with a malformed or absent ORIGIN attribute.<a href="#section-3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="update-to-the-bgp-origin-attribute-values">
@@ -1275,9 +1289,10 @@ BGP speakers <span class="bcp14">MUST NOT</span> advertise BGP UPDATE messages w
 attribute containing any other value than 0 (IGP), including manually
 configured static routes.<a href="#section-4-2" class="pilcrow">¶</a></p>
 <p id="section-4-3">Additionally, BGP speakers <span class="bcp14">SHOULD</span> rewrite any ORIGIN attribute value
-to 0 (IGP) if it contains any other value.<a href="#section-4-3" class="pilcrow">¶</a></p>
+to 0 (IGP) if it contains any other value, even a valid one, before processing
+the path attributes any further.<a href="#section-4-3" class="pilcrow">¶</a></p>
 <p id="section-4-4">If explicitly configured by a network operator to do so, BGP speakers
-<span class="bcp14">MAY</span> also advertise BGP UPDATE messages without the ORIGIN attribute at all.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<span class="bcp14">MAY</span> also advertise BGP UPDATE messages without including the ORIGIN attribute at all.<a href="#section-4-4" class="pilcrow">¶</a></p>
 <p id="section-4-5">Per the above specification, this document updates <span><a href="https://rfc-editor.org/rfc/rfc4271#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>
 by deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 <span><a href="https://rfc-editor.org/rfc/rfc4271#section-5.1.1" class="relref">Section 5.1.1</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span> by effectively making the attribute optional.<a href="#section-4-5" class="pilcrow">¶</a></p>
@@ -1288,10 +1303,17 @@ by deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
       <h2 id="name-operational-considerations">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-operational-considerations" class="section-name selfRef">Operational Considerations</a>
       </h2>
-<p id="section-5-1">The implementations may offer a configuration option to not send the ORIGIN
+<p id="section-5-1">All the results achievable by manipulating this attribute may be instead achieved
+by other techniques, most notably by AS Path Stuffing and LOCAL_PREF.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">The implementations may offer a configuration option to not send the ORIGIN
 attribute at all. The network operator must be sure, though, that the other
 side actually employs the algorithms specified in this document, otherwise
-all their routes would be treated as withdraw.<a href="#section-5-1" class="pilcrow">¶</a></p>
+all their routes would be treated as withdraw.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">The ORIGIN scrubbing is designed to happen on the receiving side, so that
+the best route selection algorithm is entered with it being always zero,
+effectively rendering the step b) of <span><a href="https://rfc-editor.org/rfc/rfc4271#section-9.1.2.2" class="relref">Section 9.1.2.2</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span> void.
+Yet, if somebody wants to per-use the attribute locally for any custom purpose,
+the algorithms are still there.<a href="#section-5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
@@ -1301,11 +1323,10 @@ all their routes would be treated as withdraw.<a href="#section-5-1" class="pilc
       </h2>
 <p id="section-6-1">Originating a route with a non-zero value of the ORIGIN attribute makes
 the route prone to unwanted prioritization by the intermediate AS's.
-Scrubbing the attribute removes this possible traffic redirection problem.
-All the results achievable by manipulating this attribute may be instead achieved
-by other techniques. Most notably, stuffing the AS Path by own AS Number is
-directly supported by the Secure Path attribute as of <span><a href="https://rfc-editor.org/rfc/rfc8205#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8205" class="cite xref">RFC8205</a>]</span>,
-being more secure and with higher priority than the ORIGIN attribute.<a href="#section-6-1" class="pilcrow">¶</a></p>
+Scrubbing the attribute removes this possible traffic redirection problem.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">Most notably, stuffing the AS Path by own AS Number is directly supported by
+the Secure Path attribute as of <span><a href="https://rfc-editor.org/rfc/rfc8205#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8205" class="cite xref">RFC8205</a>]</span>, being more secure
+and with higher priority than the ORIGIN attribute.<a href="#section-6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
