@@ -98,7 +98,7 @@ simply copied from the existing stuff out there.
 In the year 2006, there might still have been some remnants of EGP infrastructure,
 and deprecating the BGP Origin attribute altogether wasn't probably a good idea then.
 
-In September 2025, a short look {{rewriting-bgp-origin}} into the global routing table
+In September 2025, a short look {{rewriting-bgp-origin}} into the global IPv4 routing table
 shows that about 9% of the DFZ routing table bears BGP Origin value INCOMPLETE
 and under 1% there are still some routes with BGP Origin value EGP. With these routes,
 several transit providers rewrite the BGP Origin value to IGP to raise their priority
@@ -114,6 +114,11 @@ relaxing its handling and deprecating all other its values than zero.
 {::boilerplate bcp14-tagged}
 
 # Tolerance of missing or malformed BGP Origin attribute
+
+The ORIGIN attribute is considered malformed if its length is not 1
+as specified by {{Section 4.3 of -bgp}}, or its value is not one of these
+specified by {{-bgp}}. It is considered absent if it's not included in the
+UPDATE message at all.
 
 Unless explicitly configured by a network operator to do otherwise,
 if the ORIGIN attribute is malformed or absent, BGP speakers SHOULD
@@ -134,12 +139,22 @@ BGP speakers MUST NOT advertise BGP UPDATE messages with the ORIGIN
 attribute containing any other value than 0 (IGP), including manually
 configured static routes.
 
-Additionally, BGP speakers MAY rewrite any ORIGIN attribute value
-to 0 (IGP) if they contain any other value.
+Additionally, BGP speakers SHOULD rewrite any ORIGIN attribute value
+to 0 (IGP) if it contains any other value.
 
-Per the above specification, this document updates {{Section 4.3 of -bgp}} by
-deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
-{{Section 5.1.1 of -bgp}}.
+If explicitly configured by a network operator to do so, BGP speakers
+MAY also advertise BGP UPDATE messages without the ORIGIN attribute at all.
+
+Per the above specification, this document updates {{Section 4.3 of -bgp}}
+by deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
+{{Section 5.1.1 of -bgp}} by effectively making the attribute optional.
+
+# Operational Considerations
+
+The implementations may offer a configuration option to not send the ORIGIN
+attribute at all. The network operator must be sure, though, that the other
+side actually employs the algorithms specified in this document, otherwise
+all their routes would be treated as withdraw.
 
 # Security Considerations
 
