@@ -4,7 +4,7 @@
 
 Inter-Domain Routing                                          M. Matejka
 Internet-Draft                                                    CZ.NIC
-Updates: 4271 (if approved)                              3 November 2025
+Updates: 4271, 7606 (if approved)                        3 November 2025
 Intended status: Standards Track                                        
 Expires: 7 May 2026
 
