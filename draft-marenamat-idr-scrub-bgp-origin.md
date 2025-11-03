@@ -5,7 +5,7 @@ category: std
 docname: draft-marenamat-idr-scrub-bgp-origin-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
-updates: 4271
+updates: 4271, 7606
 date:
 consensus: true
 v: 3
