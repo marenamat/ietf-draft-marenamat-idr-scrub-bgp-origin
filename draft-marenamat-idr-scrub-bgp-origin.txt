@@ -80,12 +80,13 @@ Table of Contents
    2.  Conventions and Definitions
    3.  Tolerance of missing or malformed BGP Origin attribute
    4.  Update to the BGP Origin attribute values
-   5.  Operational Considerations
-   6.  Security Considerations
-   7.  IANA Considerations
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
+   5.  Additional Notes
+   6.  Operational Considerations
+   7.  Security Considerations
+   8.  IANA Considerations
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
    Acknowledgments
    Author's Address
 
@@ -189,16 +190,7 @@ Table of Contents
    (INCOMPLETE), and Section 5.1.1 of [RFC4271] by effectively making
    the attribute optional.
 
-5.  Operational Considerations
-
-   All the results achievable by manipulating this attribute may be
-   instead achieved by other techniques, most notably by AS Path
-   Stuffing and LOCAL_PREF.
-
-   The implementations may offer a configuration option to not send the
-   ORIGIN attribute at all.  The network operator must be sure, though,
-   that the other side actually employs the algorithms specified in this
-   document, otherwise all their routes would be treated as withdraw.
+5.  Additional Notes
 
    The ORIGIN scrubbing is designed to happen on the receiving side, so
    that the best route selection algorithm is entered with it being
@@ -206,7 +198,22 @@ Table of Contents
    [RFC4271] void.  Yet, if somebody wants to per-use the attribute
    locally for any custom purpose, the algorithms are still there.
 
-6.  Security Considerations
+   For the purposes of route aggregation as of Section 9.2.2.2 of
+   [RFC4271], with the scrubbed ORIGINs on input, all the ORIGINs on the
+   output are also going to be 0 (IGP).
+
+6.  Operational Considerations
+
+   All the results achievable by manipulating this attribute may be
+   instead achieved by other techniques, most notably by AS Path
+   Stuffing, LOCAL_PREF, and MED [I-D.ietf-grow-as-path-prepending].
+
+   The implementations may offer a configuration option to not send the
+   ORIGIN attribute at all.  The network operator must be sure, though,
+   that the other side actually employs the algorithms specified in this
+   document, otherwise all their routes would be treated as withdraw.
+
+7.  Security Considerations
 
    Originating a route with a non-zero value of the ORIGIN attribute
    makes the route prone to unwanted prioritization by the intermediate
@@ -218,13 +225,13 @@ Table of Contents
    [RFC8205], being more secure and with higher priority than the ORIGIN
    attribute.
 
-7.  IANA Considerations
+8.  IANA Considerations
 
    This document has no IANA actions.
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -245,13 +252,21 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-8.2.  Informative References
+9.2.  Informative References
 
    [bird-bgp-commit]
               Mareš, M., "BIRD commit: adding real comparison of BGP
               routes (inspired by the Cisco one)", 17 April 2000,
               <https://gitlab.nic.cz/labs/
               bird/-/commit/56a2bed46bf7713cd773b0fd0c097bcfc6345cc1>.
+
+   [I-D.ietf-grow-as-path-prepending]
+              McBride, M., Madory, D., Tantsura, J., Raszuk, R., Li, H.,
+              Heitz, J., and G. S. Mishra, "AS Path Prepending", Work in
+              Progress, Internet-Draft, draft-ietf-grow-as-path-
+              prepending-17, 17 October 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-grow-as-
+              path-prepending-17>.
 
    [rewriting-bgp-origin]
               Bensley, J., "Rewriting BGP Origin", 22 October 2025,
