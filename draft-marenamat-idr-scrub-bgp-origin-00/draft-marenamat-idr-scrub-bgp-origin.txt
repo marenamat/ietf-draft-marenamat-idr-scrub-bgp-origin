@@ -1,0 +1,314 @@
+
+
+
+
+Inter-Domain Routing                                          M. Matejka
+Internet-Draft                                                    CZ.NIC
+Updates: 4271, 7606 (if approved)                        3 November 2025
+Intended status: Standards Track                                        
+Expires: 7 May 2026
+
+
+                     Scrubbing BGP ORIGIN Attribute
+              draft-marenamat-idr-scrub-bgp-origin-latest
+
+Abstract
+
+   The BGP Origin attribute in its original meaning has been out of use
+   for years.  Yet, the BGP Origin attribute has high priority in the
+   best route selection algorithm, right after the AS Path length, and
+   it's being used inconsistently over the Internet to manipulate the
+   route preference.
+
+   This document updates RFC 4271 and RFC 7606 by making the BGP Origin
+   attribute half-optional and explicitly allowing its scrubbing to zero
+   (IGP).
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://marenamat.github.io/ietf-draft-marenamat-idr-scrub-bgp-
+   origin/draft-marenamat-idr-scrub-bgp-origin.html.  Status information
+   for this document may be found at https://datatracker.ietf.org/doc/
+   draft-marenamat-idr-scrub-bgp-origin/.
+
+   Discussion of this document takes place on the Inter-Domain Routing
+   Working Group mailing list (mailto:idr@ietf.org), which is archived
+   at https://mailarchive.ietf.org/arch/browse/idr/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/idr/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/marenamat/ietf-draft-marenamat-idr-scrub-bgp-
+   origin.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 7 May 2026.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Conventions and Definitions
+   3.  Tolerance of missing or malformed BGP Origin attribute
+   4.  Update to the BGP Origin attribute values
+   5.  Additional Notes
+   6.  Operational Considerations
+   7.  Security Considerations
+   8.  IANA Considerations
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
+   Acknowledgments
+   Author's Address
+
+1.  Introduction
+
+   Origins of the BGP Origin attribute stem from times when BGP was not
+   the only full internet routing protocol, and was slowly replacing EGP
+   ([RFC904]).  First seen in the first published BGP draft as the
+   Direction field in the UPDATE message (see Section 3.4 of [RFC1105]),
+   later refined into the Origin attribute (see Section 5 of [RFC1163])
+   with just three values: IGP, EGP and Incomplete.
+
+   While the attribute itself has been long established, even in 1995 in
+   [RFC1771], it is not being formally specified to be used for best
+   route selection.  Instead, using the origin attribute was suggested
+   in [RFC1772] to be used as an indicator of better route, together
+   with AS Path Length and more criteria.
+
+   It's hard to dig through the archives to find out what happened when
+   and why, but it's safe to assume that most of the BGP implementations
+   of that time simply used a very similar tie breaking algorithm
+   without formal specification, as documented e.g. in
+   [bird-bgp-commit].  With that, the tie breaking in its current form,
+   specified in Section 9.1.2.2 of [RFC4271], was most probably simply
+   copied from the existing stuff out there.
+
+   In the year 2006, there might still have been some remnants of EGP
+   infrastructure, and deprecating the BGP Origin attribute altogether
+   wasn't probably a good idea then.
+
+   In September 2025, a short look [rewriting-bgp-origin] into the
+   global IPv4 routing table shows that about 9% of the DFZ routing
+   table bears BGP Origin value INCOMPLETE and under 1% there are still
+   some routes with BGP Origin value EGP.  With these routes, several
+   transit providers rewrite the BGP Origin value to IGP to raise their
+   priority in the best route selection.  Rather curiously, there are
+   even several IPv6 routes with BGP Origin value EGP.
+
+   Therefore, this document makes the first needed steps to deprecate
+   the BGP Origin attribute in the future by updating the rules for its
+   origination, relaxing its handling and deprecating all other its
+   values than zero.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+3.  Tolerance of missing or malformed BGP Origin attribute
+
+   The ORIGIN attribute is considered malformed if its length is not 1
+   as specified by Section 4.3 of [RFC4271], or its value is not one of
+   these specified by [RFC4271].  It is considered absent if it's not
+   included in the UPDATE message at all.
+
+   Unless explicitly configured by a network operator to do otherwise,
+   if the ORIGIN attribute is malformed or absent, BGP speakers SHOULD
+   accept such UPDATE message.  In such case, before the path attributes
+   are processed any further:
+
+   *  If the ORIGIN attribute is absent, the BGP speaker MUST add a new
+      ORIGIN attribute with the value of 0 (IGP).
+
+   *  If the ORIGIN attribute length is not 1, the BGP speaker MUST
+      replace that attribute with a new ORIGIN attribute with the value
+      of 0 (IGP).
+
+   *  If the ORIGIN attribute value is not 0 (IGP), the BGP speaker
+      SHOULD rewrite that value to 0 (IGP).
+
+   The BGP speaker SHOULD allow logging the original ORIGIN attribute
+   value.
+
+   Per the above specification, this document updates Section 7.1 of
+   [RFC7606] by accepting routes with a malformed or absent ORIGIN
+   attribute.
+
+4.  Update to the BGP Origin attribute values
+
+   The values of the BGP Origin attribute are specified in Section 4.3
+   of [RFC4271], the Path attribute part, a) ORIGIN (Type Code 1).
+
+   Unless explicitly configured by a network operator to do otherwise,
+   BGP speakers MUST NOT advertise BGP UPDATE messages with the ORIGIN
+   attribute containing any other value than 0 (IGP), including manually
+   configured static routes.
+
+   Additionally, BGP speakers SHOULD rewrite any ORIGIN attribute value
+   to 0 (IGP) if it contains any other value, even a valid one, before
+   processing the path attributes any further.
+
+   If explicitly configured by a network operator to do so, BGP speakers
+   MAY also advertise BGP UPDATE messages without including the ORIGIN
+   attribute at all.
+
+   Per the above specification, this document updates Section 4.3 of
+   [RFC4271] by deprecating ORIGIN attribute values 1 (EGP) and 2
+   (INCOMPLETE), and Section 5.1.1 of [RFC4271] by effectively making
+   the attribute optional.
+
+5.  Additional Notes
+
+   The ORIGIN scrubbing is designed to happen on the receiving side, so
+   that the best route selection algorithm is entered with it being
+   always zero, effectively rendering the step b) of Section 9.1.2.2 of
+   [RFC4271] void.  Yet, if somebody wants to per-use the attribute
+   locally for any custom purpose, the algorithms are still there.
+
+   For the purposes of route aggregation as of Section 9.2.2.2 of
+   [RFC4271], with the scrubbed ORIGINs on input, all the ORIGINs on the
+   output are also going to be 0 (IGP).
+
+6.  Operational Considerations
+
+   All the results achievable by manipulating this attribute may be
+   instead achieved by other techniques, most notably by AS Path
+   Stuffing, LOCAL_PREF, and MED [I-D.ietf-grow-as-path-prepending].
+
+   The implementations may offer a configuration option to not send the
+   ORIGIN attribute at all.  The network operator must be sure, though,
+   that the other side actually employs the algorithms specified in this
+   document, otherwise all their routes would be treated as withdraw.
+
+7.  Security Considerations
+
+   Originating a route with a non-zero value of the ORIGIN attribute
+   makes the route prone to unwanted prioritization by the intermediate
+   AS's.  Scrubbing the attribute removes this possible traffic
+   redirection problem.
+
+   Most notably, stuffing the AS Path by own AS Number is directly
+   supported by the Secure Path attribute as of Section 3.1 of
+   [RFC8205], being more secure and with higher priority than the ORIGIN
+   attribute.
+
+8.  IANA Considerations
+
+   This document has no IANA actions.
+
+9.  References
+
+9.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC4271]  Rekhter, Y., Ed., Li, T., Ed., and S. Hares, Ed., "A
+              Border Gateway Protocol 4 (BGP-4)", RFC 4271,
+              DOI 10.17487/RFC4271, January 2006,
+              <https://www.rfc-editor.org/rfc/rfc4271>.
+
+   [RFC7606]  Chen, E., Ed., Scudder, J., Ed., Mohapatra, P., and K.
+              Patel, "Revised Error Handling for BGP UPDATE Messages",
+              RFC 7606, DOI 10.17487/RFC7606, August 2015,
+              <https://www.rfc-editor.org/rfc/rfc7606>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+9.2.  Informative References
+
+   [bird-bgp-commit]
+              Mareš, M., "BIRD commit: adding real comparison of BGP
+              routes (inspired by the Cisco one)", 17 April 2000,
+              <https://gitlab.nic.cz/labs/
+              bird/-/commit/56a2bed46bf7713cd773b0fd0c097bcfc6345cc1>.
+
+   [I-D.ietf-grow-as-path-prepending]
+              McBride, M., Madory, D., Tantsura, J., Raszuk, R., Li, H.,
+              Heitz, J., and G. S. Mishra, "AS Path Prepending", Work in
+              Progress, Internet-Draft, draft-ietf-grow-as-path-
+              prepending-17, 17 October 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-grow-as-
+              path-prepending-17>.
+
+   [rewriting-bgp-origin]
+              Bensley, J., "Rewriting BGP Origin", 22 October 2025,
+              <https://ripe91.ripe.net/programme/meeting-
+              plan/sessions/30/GJ8PFJ/>.
+
+   [RFC1105]  Lougheed, K. and Y. Rekhter, "Border Gateway Protocol
+              (BGP)", RFC 1105, DOI 10.17487/RFC1105, June 1989,
+              <https://www.rfc-editor.org/rfc/rfc1105>.
+
+   [RFC1163]  Lougheed, K. and Y. Rekhter, "Border Gateway Protocol
+              (BGP)", RFC 1163, DOI 10.17487/RFC1163, June 1990,
+              <https://www.rfc-editor.org/rfc/rfc1163>.
+
+   [RFC1771]  Rekhter, Y. and T. Li, "A Border Gateway Protocol 4 (BGP-
+              4)", RFC 1771, DOI 10.17487/RFC1771, March 1995,
+              <https://www.rfc-editor.org/rfc/rfc1771>.
+
+   [RFC1772]  Rekhter, Y. and P. Gross, "Application of the Border
+              Gateway Protocol in the Internet", RFC 1772,
+              DOI 10.17487/RFC1772, March 1995,
+              <https://www.rfc-editor.org/rfc/rfc1772>.
+
+   [RFC8205]  Lepinski, M., Ed. and K. Sriram, Ed., "BGPsec Protocol
+              Specification", RFC 8205, DOI 10.17487/RFC8205, September
+              2017, <https://www.rfc-editor.org/rfc/rfc8205>.
+
+   [RFC904]   Mills, D., "Exterior Gateway Protocol formal
+              specification", RFC 904, DOI 10.17487/RFC0904, April 1984,
+              <https://www.rfc-editor.org/rfc/rfc904>.
+
+Acknowledgments
+
+   The authors wish to thank James Bensley, Gert Doering, Wolfgang
+   Tremmel, Ondřej Zajíček, and Alexander Zubkov for valuable comments,
+   suggestions and discussions on the topic and text of the document.
+
+Author's Address
+
+   Maria Matejka
+   CZ.NIC
+   Milesovska 1136/5
+   13000 Praha
+   Czechia
+   Email: maria.matejka@nic.cz, mq@jmq.cz
