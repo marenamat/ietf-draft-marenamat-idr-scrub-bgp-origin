@@ -59,6 +59,7 @@ informative:
       ins: J. Bensley
       name: James Bensley
       org: Inter.link
+  I-D.ietf-grow-as-path-prepending: path-stuffing
 #  RFC6472: as-set-not-use
 #  RFC9774: as-set-deprecation
 
@@ -158,21 +159,27 @@ Per the above specification, this document updates {{Section 4.3 of -bgp}}
 by deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 {{Section 5.1.1 of -bgp}} by effectively making the attribute optional.
 
-# Operational Considerations
-
-All the results achievable by manipulating this attribute may be instead achieved
-by other techniques, most notably by AS Path Stuffing and LOCAL_PREF.
-
-The implementations may offer a configuration option to not send the ORIGIN
-attribute at all. The network operator must be sure, though, that the other
-side actually employs the algorithms specified in this document, otherwise
-all their routes would be treated as withdraw.
+# Additional Notes
 
 The ORIGIN scrubbing is designed to happen on the receiving side, so that
 the best route selection algorithm is entered with it being always zero,
 effectively rendering the step b) of {{Section 9.1.2.2 of -bgp}} void.
 Yet, if somebody wants to per-use the attribute locally for any custom purpose,
 the algorithms are still there.
+
+For the purposes of route aggregation as of {{Section 9.2.2.2 of -bgp}},
+with the scrubbed ORIGINs on input, all the ORIGINs on the output are also
+going to be 0 (IGP).
+
+# Operational Considerations
+
+All the results achievable by manipulating this attribute may be instead achieved
+by other techniques, most notably by AS Path Stuffing, LOCAL_PREF, and MED {{-path-stuffing}}.
+
+The implementations may offer a configuration option to not send the ORIGIN
+attribute at all. The network operator must be sure, though, that the other
+side actually employs the algorithms specified in this document, otherwise
+all their routes would be treated as withdraw.
 
 # Security Considerations
 
