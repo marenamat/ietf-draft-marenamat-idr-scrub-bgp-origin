@@ -35,8 +35,29 @@ author:
 
 normative:
   RFC4271: bgp
+  RFC7606: bgp-update-error-handling
 
-#informative:
+informative:
+  RFC904: egp
+  RFC1105: bgp-experimental
+  RFC1163: first-bgp-with-origin-attribute
+  RFC1771: legacy-bgp
+  RFC1772: bgp-is-better-than-egp
+  bird-bgp-commit:
+    title: "BIRD commit: adding real comparison of BGP routes (inspired by the Cisco one)"
+    target: https://gitlab.nic.cz/labs/bird/-/commit/56a2bed46bf7713cd773b0fd0c097bcfc6345cc1
+    date: 2000-04-17
+    author:
+      ins: M. Mareš
+      name: Martin Mareš
+  rewriting-bgp-origin:
+    title: Rewriting BGP Origin
+    target: https://ripe91.ripe.net/programme/meeting-plan/sessions/30/GJ8PFJ/
+    date: 2025-10-22
+    author:
+      ins: J. Bensley
+      name: James Bensley
+      org: Inter.link
 #  RFC6472: as-set-not-use
 #  RFC9774: as-set-deprecation
 
@@ -47,15 +68,45 @@ Yet, the BGP Origin attribute has high priority in the best route
 selection algorithm, right after the AS Path length, and it's being used
 inconsistently over the Internet to manipulate the route preference.
 
-This document updates RFC 4271 by making the BGP Origin attribute half-optional
-and explicitly allowing its scrubbing to zero (IGP).
+This document updates RFC 4271 and RFC 7606 by making the BGP Origin attribute
+half-optional and explicitly allowing its scrubbing to zero (IGP).
 
 --- middle
 
 # Introduction
 
-TODO Introduction
+Origins of the BGP Origin attribute stem from times when BGP was not the only
+full internet routing protocol, and was slowly replacing EGP ({{egp}}). First
+seen in the first published BGP draft as the Direction field in the UPDATE
+message (see {{Section 3.4 of -bgp-experimental}}), later refined into the
+Origin attribute (see {{Section 5 of -first-bgp-with-origin-attribute}})
+with just three values: IGP, EGP and Incomplete.
 
+While the attribute itself has been long established, even in 1995 in {{legacy-bgp}},
+it is not being formally specified to be used for best route selection. Instead,
+using the origin attribute was suggested in {{bgp-is-better-than-egp}} to be used
+as an indicator of better route, together with AS Path Length and more criteria.
+
+It's hard to dig through the archives to find out what happened when and why,
+but it's safe to assume that most of the BGP implementations of that time
+simply used a very similar tie breaking algorithm without formal specification,
+as documented e.g. in {{bird-bgp-commit}}. With that, the tie breaking in its
+current form, specified in {{Section 9.1.2.2 of -bgp}}, was most probably
+simply copied from the existing stuff out there.
+
+In the year 2006, there might still have been some remnants of EGP infrastructure,
+and deprecating the BGP Origin attribute altogether wasn't probably a good idea then.
+
+In September 2025, a short look {{rewriting-bgp-origin}} into the global routing table
+shows that about 9% of the DFZ routing table bears BGP Origin value INCOMPLETE
+and under 1% there are still some routes with BGP Origin value EGP. With these routes,
+several transit providers rewrite the BGP Origin value to IGP to raise their priority
+in the best route selection. Rather curiously, there are even several IPv6
+routes with BGP Origin value EGP.
+
+Therefore, this document makes the first needed steps to deprecate the BGP
+Origin attribute in the future by updating the rules for its origination
+and relaxing its handling.
 
 # Conventions and Definitions
 
@@ -64,14 +115,13 @@ TODO Introduction
 # Tolerance of missing or malformed BGP Origin attribute
 
 Unless explicitly configured by a network operator to do otherwise,
-if the ORIGIN attribute has an undefined value, BGP speakers SHOULD
-replace it by a value of 0 (IGP).
+if the ORIGIN attribute is malformed or absent, BGP speakers SHOULD
+accept such UPDATE message and replace the ORIGIN attribute
+by a value of 0 (IGP).
 
-BGP speakers SHOULD NOT generate UPDATE Message Errors with the subcode 6,
-Invalid ORIGIN Attribute.
-
-Per the above specification, this document updates {{Section 4.5 of -bgp}}
-by accepting routes without the ORIGIN attribute.
+Per the above specification, this document updates
+{{Section 7.1 of -bgp-update-error-handling}}
+by accepting routes with a malformed ORIGIN attribute.
 
 # Update to the BGP Origin attribute values
 
@@ -92,8 +142,10 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 
 # Security Considerations
 
-TODO Security
-
+Originating a route with a non-zero value of the ORIGIN attribute makes
+the route prone to unwanted prioritization by the intermediate AS's, and all the
+results achievable by manipulating this attribute may be instead achieved
+by techniques like AS Path Stuffing or setting the MULTI_EXIT_DISC attribute.
 
 # IANA Considerations
 
@@ -105,4 +157,6 @@ This document has no IANA actions.
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+The authors wish to thank James Bensley, Gert Doering, Wolfgang Tremmel,
+Ondřej Zajíček, and Alexander Zubkov for valuable comments, suggestions and
+discussions on the topic and text of the document.
