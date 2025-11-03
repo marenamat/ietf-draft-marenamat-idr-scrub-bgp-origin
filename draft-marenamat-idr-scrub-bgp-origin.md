@@ -122,8 +122,16 @@ UPDATE message at all.
 
 Unless explicitly configured by a network operator to do otherwise,
 if the ORIGIN attribute is malformed or absent, BGP speakers SHOULD
-accept such UPDATE message and replace the ORIGIN attribute
-by a value of 0 (IGP).
+accept such UPDATE message. In such case, before the path attributes are processed any further:
+
+- If the ORIGIN attribute is absent, the BGP speaker MUST add a new ORIGIN attribute
+  with the value of 0 (IGP).
+- If the ORIGIN attribute length is not 1, the BGP speaker MUST replace that
+  attribute with a new ORIGIN attribute with the value of 0 (IGP).
+- If the ORIGIN attribute value is not 0 (IGP), the BGP speaker SHOULD rewrite
+  that value to 0 (IGP).
+
+The BGP speaker SHOULD allow logging the original ORIGIN attribute value.
 
 Per the above specification, this document updates
 {{Section 7.1 of -bgp-update-error-handling}}
@@ -140,10 +148,11 @@ attribute containing any other value than 0 (IGP), including manually
 configured static routes.
 
 Additionally, BGP speakers SHOULD rewrite any ORIGIN attribute value
-to 0 (IGP) if it contains any other value.
+to 0 (IGP) if it contains any other value, even a valid one, before processing
+the path attributes any further.
 
 If explicitly configured by a network operator to do so, BGP speakers
-MAY also advertise BGP UPDATE messages without the ORIGIN attribute at all.
+MAY also advertise BGP UPDATE messages without including the ORIGIN attribute at all.
 
 Per the above specification, this document updates {{Section 4.3 of -bgp}}
 by deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
@@ -151,20 +160,29 @@ by deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 
 # Operational Considerations
 
+All the results achievable by manipulating this attribute may be instead achieved
+by other techniques, most notably by AS Path Stuffing and LOCAL_PREF.
+
 The implementations may offer a configuration option to not send the ORIGIN
 attribute at all. The network operator must be sure, though, that the other
 side actually employs the algorithms specified in this document, otherwise
 all their routes would be treated as withdraw.
+
+The ORIGIN scrubbing is designed to happen on the receiving side, so that
+the best route selection algorithm is entered with it being always zero,
+effectively rendering the step b) of {{Section 9.1.2.2 of -bgp}} void.
+Yet, if somebody wants to per-use the attribute locally for any custom purpose,
+the algorithms are still there.
 
 # Security Considerations
 
 Originating a route with a non-zero value of the ORIGIN attribute makes
 the route prone to unwanted prioritization by the intermediate AS's.
 Scrubbing the attribute removes this possible traffic redirection problem.
-All the results achievable by manipulating this attribute may be instead achieved
-by other techniques. Most notably, stuffing the AS Path by own AS Number is
-directly supported by the Secure Path attribute as of {{Section 3.1 of -bgpsec}},
-being more secure and with higher priority than the ORIGIN attribute.
+
+Most notably, stuffing the AS Path by own AS Number is directly supported by
+the Secure Path attribute as of {{Section 3.1 of -bgpsec}}, being more secure
+and with higher priority than the ORIGIN attribute.
 
 # IANA Considerations
 
