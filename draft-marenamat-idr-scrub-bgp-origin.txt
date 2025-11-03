@@ -125,7 +125,8 @@ Table of Contents
 
    Therefore, this document makes the first needed steps to deprecate
    the BGP Origin attribute in the future by updating the rules for its
-   origination and relaxing its handling.
+   origination, relaxing its handling and deprecating all other its
+   values than zero.
 
 2.  Conventions and Definitions
 
@@ -143,13 +144,13 @@ Table of Contents
    value of 0 (IGP).
 
    Per the above specification, this document updates Section 7.1 of
-   [RFC7606] by accepting routes with a malformed ORIGIN attribute.
+   [RFC7606] by accepting routes with a malformed or absent ORIGIN
+   attribute.
 
 4.  Update to the BGP Origin attribute values
 
-   The values of the BGP Origin attributed are originally specified in
-   Section 4.3 of [RFC4271], the Path attribute part, a) ORIGIN (Type
-   Code 1).
+   The values of the BGP Origin attribute are specified in Section 4.3
+   of [RFC4271], the Path attribute part, a) ORIGIN (Type Code 1).
 
    Unless explicitly configured by a network operator to do otherwise,
    BGP speakers MUST NOT advertise BGP UPDATE messages with the ORIGIN
@@ -167,9 +168,12 @@ Table of Contents
 
    Originating a route with a non-zero value of the ORIGIN attribute
    makes the route prone to unwanted prioritization by the intermediate
-   AS's, and all the results achievable by manipulating this attribute
-   may be instead achieved by techniques like AS Path Stuffing or
-   setting the MULTI_EXIT_DISC attribute.
+   AS's.  Scrubbing the attribute removes this possible traffic
+   redirection problem.  All the results achievable by manipulating this
+   attribute may be instead achieved by other techniques.  Most notably,
+   stuffing the AS Path by own AS Number is directly supported by the
+   Secure Path attribute as of Section 3.1 of [RFC8205], being more
+   secure and with higher priority than the ORIGIN attribute.
 
 6.  IANA Considerations
 
@@ -227,6 +231,10 @@ Table of Contents
               Gateway Protocol in the Internet", RFC 1772,
               DOI 10.17487/RFC1772, March 1995,
               <https://www.rfc-editor.org/rfc/rfc1772>.
+
+   [RFC8205]  Lepinski, M., Ed. and K. Sriram, Ed., "BGPsec Protocol
+              Specification", RFC 8205, DOI 10.17487/RFC8205, September
+              2017, <https://www.rfc-editor.org/rfc/rfc8205>.
 
    [RFC904]   Mills, D., "Exterior Gateway Protocol formal
               specification", RFC 904, DOI 10.17487/RFC0904, April 1984,

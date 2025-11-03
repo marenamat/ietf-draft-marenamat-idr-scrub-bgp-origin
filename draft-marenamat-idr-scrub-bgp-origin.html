@@ -1227,8 +1227,8 @@ several transit providers rewrite the BGP Origin value to IGP to raise their pri
 in the best route selection. Rather curiously, there are even several IPv6
 routes with BGP Origin value EGP.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">Therefore, this document makes the first needed steps to deprecate the BGP
-Origin attribute in the future by updating the rules for its origination
-and relaxing its handling.<a href="#section-1-6" class="pilcrow">¶</a></p>
+Origin attribute in the future by updating the rules for its origination,
+relaxing its handling and deprecating all other its values than zero.<a href="#section-1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1253,7 +1253,7 @@ accept such UPDATE message and replace the ORIGIN attribute
 by a value of 0 (IGP).<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">Per the above specification, this document updates
 <span><a href="https://rfc-editor.org/rfc/rfc7606#section-7.1" class="relref">Section 7.1</a> of [<a href="#RFC7606" class="cite xref">RFC7606</a>]</span>
-by accepting routes with a malformed ORIGIN attribute.<a href="#section-3-2" class="pilcrow">¶</a></p>
+by accepting routes with a malformed or absent ORIGIN attribute.<a href="#section-3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="update-to-the-bgp-origin-attribute-values">
@@ -1261,8 +1261,8 @@ by accepting routes with a malformed ORIGIN attribute.<a href="#section-3-2" cla
       <h2 id="name-update-to-the-bgp-origin-at">
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-update-to-the-bgp-origin-at" class="section-name selfRef">Update to the BGP Origin attribute values</a>
       </h2>
-<p id="section-4-1">The values of the BGP Origin attributed are originally specified
-in <span><a href="https://rfc-editor.org/rfc/rfc4271#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>, the Path attribute part, a) ORIGIN (Type Code 1).<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-1">The values of the BGP Origin attribute are specified in
+<span><a href="https://rfc-editor.org/rfc/rfc4271#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>, the Path attribute part, a) ORIGIN (Type Code 1).<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">Unless explicitly configured by a network operator to do otherwise,
 BGP speakers <span class="bcp14">MUST NOT</span> advertise BGP UPDATE messages with the ORIGIN
 attribute containing any other value than 0 (IGP), including manually
@@ -1280,9 +1280,12 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
 <p id="section-5-1">Originating a route with a non-zero value of the ORIGIN attribute makes
-the route prone to unwanted prioritization by the intermediate AS's, and all the
-results achievable by manipulating this attribute may be instead achieved
-by techniques like AS Path Stuffing or setting the <code>MULTI_EXIT_DISC</code> attribute.<a href="#section-5-1" class="pilcrow">¶</a></p>
+the route prone to unwanted prioritization by the intermediate AS's.
+Scrubbing the attribute removes this possible traffic redirection problem.
+All the results achievable by manipulating this attribute may be instead achieved
+by other techniques. Most notably, stuffing the AS Path by own AS Number is
+directly supported by the Secure Path attribute as of <span><a href="https://rfc-editor.org/rfc/rfc8205#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8205" class="cite xref">RFC8205</a>]</span>,
+being more secure and with higher priority than the ORIGIN attribute.<a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1352,6 +1355,10 @@ by techniques like AS Path Stuffing or setting the <code>MULTI_EXIT_DISC</code> 
 <dt id="RFC1772">[RFC1772]</dt>
         <dd>
 <span class="refAuthor">Rekhter, Y.</span> and <span class="refAuthor">P. Gross</span>, <span class="refTitle">"Application of the Border Gateway Protocol in the Internet"</span>, <span class="seriesInfo">RFC 1772</span>, <span class="seriesInfo">DOI 10.17487/RFC1772</span>, <time datetime="1995-03" class="refDate">March 1995</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1772">https://www.rfc-editor.org/rfc/rfc1772</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8205">[RFC8205]</dt>
+        <dd>
+<span class="refAuthor">Lepinski, M., Ed.</span> and <span class="refAuthor">K. Sriram, Ed.</span>, <span class="refTitle">"BGPsec Protocol Specification"</span>, <span class="seriesInfo">RFC 8205</span>, <span class="seriesInfo">DOI 10.17487/RFC8205</span>, <time datetime="2017-09" class="refDate">September 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8205">https://www.rfc-editor.org/rfc/rfc8205</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC904">[RFC904]</dt>
       <dd>
