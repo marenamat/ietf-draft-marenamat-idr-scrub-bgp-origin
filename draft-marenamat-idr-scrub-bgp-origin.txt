@@ -80,11 +80,12 @@ Table of Contents
    2.  Conventions and Definitions
    3.  Tolerance of missing or malformed BGP Origin attribute
    4.  Update to the BGP Origin attribute values
-   5.  Security Considerations
-   6.  IANA Considerations
-   7.  References
-     7.1.  Normative References
-     7.2.  Informative References
+   5.  Operational Considerations
+   6.  Security Considerations
+   7.  IANA Considerations
+   8.  References
+     8.1.  Normative References
+     8.2.  Informative References
    Acknowledgments
    Author's Address
 
@@ -116,12 +117,12 @@ Table of Contents
    wasn't probably a good idea then.
 
    In September 2025, a short look [rewriting-bgp-origin] into the
-   global routing table shows that about 9% of the DFZ routing table
-   bears BGP Origin value INCOMPLETE and under 1% there are still some
-   routes with BGP Origin value EGP.  With these routes, several transit
-   providers rewrite the BGP Origin value to IGP to raise their priority
-   in the best route selection.  Rather curiously, there are even
-   several IPv6 routes with BGP Origin value EGP.
+   global IPv4 routing table shows that about 9% of the DFZ routing
+   table bears BGP Origin value INCOMPLETE and under 1% there are still
+   some routes with BGP Origin value EGP.  With these routes, several
+   transit providers rewrite the BGP Origin value to IGP to raise their
+   priority in the best route selection.  Rather curiously, there are
+   even several IPv6 routes with BGP Origin value EGP.
 
    Therefore, this document makes the first needed steps to deprecate
    the BGP Origin attribute in the future by updating the rules for its
@@ -137,6 +138,11 @@ Table of Contents
    capitals, as shown here.
 
 3.  Tolerance of missing or malformed BGP Origin attribute
+
+   The ORIGIN attribute is considered malformed if its length is not 1
+   as specified by Section 4.3 of [RFC4271], or its value is not one of
+   these specified by [RFC4271].  It is considered absent if it's not
+   included in the UPDATE message at all.
 
    Unless explicitly configured by a network operator to do otherwise,
    if the ORIGIN attribute is malformed or absent, BGP speakers SHOULD
@@ -157,14 +163,26 @@ Table of Contents
    attribute containing any other value than 0 (IGP), including manually
    configured static routes.
 
-   Additionally, BGP speakers MAY rewrite any ORIGIN attribute value to
-   0 (IGP) if they contain any other value.
+   Additionally, BGP speakers SHOULD rewrite any ORIGIN attribute value
+   to 0 (IGP) if it contains any other value.
+
+   If explicitly configured by a network operator to do so, BGP speakers
+   MAY also advertise BGP UPDATE messages without the ORIGIN attribute
+   at all.
 
    Per the above specification, this document updates Section 4.3 of
    [RFC4271] by deprecating ORIGIN attribute values 1 (EGP) and 2
-   (INCOMPLETE), and Section 5.1.1 of [RFC4271].
+   (INCOMPLETE), and Section 5.1.1 of [RFC4271] by effectively making
+   the attribute optional.
 
-5.  Security Considerations
+5.  Operational Considerations
+
+   The implementations may offer a configuration option to not send the
+   ORIGIN attribute at all.  The network operator must be sure, though,
+   that the other side actually employs the algorithms specified in this
+   document, otherwise all their routes would be treated as withdraw.
+
+6.  Security Considerations
 
    Originating a route with a non-zero value of the ORIGIN attribute
    makes the route prone to unwanted prioritization by the intermediate
@@ -175,13 +193,13 @@ Table of Contents
    Secure Path attribute as of Section 3.1 of [RFC8205], being more
    secure and with higher priority than the ORIGIN attribute.
 
-6.  IANA Considerations
+7.  IANA Considerations
 
    This document has no IANA actions.
 
-7.  References
+8.  References
 
-7.1.  Normative References
+8.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -202,7 +220,7 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-7.2.  Informative References
+8.2.  Informative References
 
    [bird-bgp-commit]
               Mareš, M., "BIRD commit: adding real comparison of BGP
