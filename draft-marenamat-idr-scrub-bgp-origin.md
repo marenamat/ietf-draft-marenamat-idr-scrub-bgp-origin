@@ -76,15 +76,15 @@ half-optional and explicitly allowing its scrubbing to zero (IGP).
 # Introduction
 
 Origins of the BGP Origin attribute stem from times when BGP was not the only
-full internet routing protocol, and was slowly replacing EGP ({{egp}}). First
+full internet routing protocol, and was slowly replacing EGP ({{-egp}}). First
 seen in the first published BGP draft as the Direction field in the UPDATE
 message (see {{Section 3.4 of -bgp-experimental}}), later refined into the
 Origin attribute (see {{Section 5 of -first-bgp-with-origin-attribute}})
 with just three values: IGP, EGP and Incomplete.
 
-While the attribute itself has been long established, even in 1995 in {{legacy-bgp}},
+While the attribute itself has been long established, even in 1995 in {{-legacy-bgp}},
 it is not being formally specified to be used for best route selection. Instead,
-using the origin attribute was suggested in {{bgp-is-better-than-egp}} to be used
+using the origin attribute was suggested in {{-bgp-is-better-than-egp}} to be used
 as an indicator of better route, together with AS Path Length and more criteria.
 
 It's hard to dig through the archives to find out what happened when and why,
@@ -145,7 +145,7 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 Originating a route with a non-zero value of the ORIGIN attribute makes
 the route prone to unwanted prioritization by the intermediate AS's, and all the
 results achievable by manipulating this attribute may be instead achieved
-by techniques like AS Path Stuffing or setting the MULTI_EXIT_DISC attribute.
+by techniques like AS Path Stuffing or setting the `MULTI_EXIT_DISC` attribute.
 
 # IANA Considerations
 
