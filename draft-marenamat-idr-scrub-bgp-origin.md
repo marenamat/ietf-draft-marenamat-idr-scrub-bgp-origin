@@ -113,16 +113,32 @@ relaxing its handling and deprecating all other its values than zero.
 
 {::boilerplate bcp14-tagged}
 
-# Tolerance of missing or malformed BGP Origin attribute
+# Tolerance of missing or undefined BGP Origin attribute
 
-Unless explicitly configured by a network operator to do otherwise,
-if the ORIGIN attribute is malformed or absent, BGP speakers SHOULD
-accept such UPDATE message and replace the ORIGIN attribute
-by a value of 0 (IGP).
+The attribute is considered malformed if its length is not 1.
 
 Per the above specification, this document updates
 {{Section 7.1 of -bgp-update-error-handling}}
-by accepting routes with a malformed or absent ORIGIN attribute.
+by not considering malformed an ORIGIN attribute with
+an undefined value.
+
+Unless explicitly configured by a network operator to do otherwise,
+if the ORIGIN attribute is present but not malformed, BGP speakers MUST
+accept such UPDATE message and SHOULD replace the ORIGIN attribute
+by a value of 0 (IGP).
+
+Unless explicitly configured by a network operator to do otherwise,
+if the ORIGIN attribute is absent, BGP speakers MUST
+accept such UPDATE message and SHOULD add the ORIGIN attribute
+with a value of 0 (IGP).
+
+Per the above specification, this document updates
+{{Section 4.3 of -bgp}}, the Paths Attributes part, a),
+{{Section 5 of -bgp}}, {{Section 5.1.1 of -bgp}},
+{{Section 6.3 of -bgp}}
+by not considering an ORIGIN attribute mandatory, but
+optional. Though for transition period it is RECOMMENDED
+to add the attribute for compatibility with legacy BGP speakers.
 
 # Update to the BGP Origin attribute values
 
@@ -134,7 +150,7 @@ BGP speakers MUST NOT advertise BGP UPDATE messages with the ORIGIN
 attribute containing any other value than 0 (IGP), including manually
 configured static routes.
 
-Additionally, BGP speakers MAY rewrite any ORIGIN attribute value
+Additionally, BGP speakers SHOULD rewrite any ORIGIN attribute value
 to 0 (IGP) if they contain any other value.
 
 Per the above specification, this document updates {{Section 4.3 of -bgp}} by
