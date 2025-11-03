@@ -43,6 +43,7 @@ informative:
   RFC1163: first-bgp-with-origin-attribute
   RFC1771: legacy-bgp
   RFC1772: bgp-is-better-than-egp
+  RFC8205: bgpsec
   bird-bgp-commit:
     title: "BIRD commit: adding real comparison of BGP routes (inspired by the Cisco one)"
     target: https://gitlab.nic.cz/labs/bird/-/commit/56a2bed46bf7713cd773b0fd0c097bcfc6345cc1
@@ -105,8 +106,8 @@ in the best route selection. Rather curiously, there are even several IPv6
 routes with BGP Origin value EGP.
 
 Therefore, this document makes the first needed steps to deprecate the BGP
-Origin attribute in the future by updating the rules for its origination
-and relaxing its handling.
+Origin attribute in the future by updating the rules for its origination,
+relaxing its handling and deprecating all other its values than zero.
 
 # Conventions and Definitions
 
@@ -141,8 +142,8 @@ to add the attribute for compatibility with legacy BGP speakers.
 
 # Update to the BGP Origin attribute values
 
-The values of the BGP Origin attributed are originally specified
-in {{Section 4.3 of -bgp}}, the Path attribute part, a) ORIGIN (Type Code 1).
+The values of the BGP Origin attribute are specified in
+{{Section 4.3 of -bgp}}, the Path attribute part, a) ORIGIN (Type Code 1).
 
 Unless explicitly configured by a network operator to do otherwise,
 BGP speakers MUST NOT advertise BGP UPDATE messages with the ORIGIN
@@ -159,9 +160,12 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 # Security Considerations
 
 Originating a route with a non-zero value of the ORIGIN attribute makes
-the route prone to unwanted prioritization by the intermediate AS's, and all the
-results achievable by manipulating this attribute may be instead achieved
-by techniques like AS Path Stuffing or setting the `MULTI_EXIT_DISC` attribute.
+the route prone to unwanted prioritization by the intermediate AS's.
+Scrubbing the attribute removes this possible traffic redirection problem.
+All the results achievable by manipulating this attribute may be instead achieved
+by other techniques. Most notably, stuffing the AS Path by own AS Number is
+directly supported by the Secure Path attribute as of {{Section 3.1 of -bgpsec}},
+being more secure and with higher priority than the ORIGIN attribute.
 
 # IANA Considerations
 
