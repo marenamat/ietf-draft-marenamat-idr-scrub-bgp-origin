@@ -11,8 +11,8 @@
 Yet, the BGP Origin attribute has high priority in the best route
 selection algorithm, right after the AS Path length, and it's being used
 inconsistently over the Internet to manipulate the route preference. 
-       This document updates RFC 4271 by making the BGP Origin attribute half-optional
-and explicitly allowing its scrubbing to zero (IGP). 
+       This document updates RFC 4271 and RFC 7606 by making the BGP Origin attribute
+half-optional and explicitly allowing its scrubbing to zero (IGP). 
     " name="description">
 <meta content="xml2rfc 3.31.0" name="generator">
 <meta content="EGP" name="keyword">
@@ -1053,7 +1053,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Matejka</td>
-<td class="center">Expires 5 May 2026</td>
+<td class="center">Expires 7 May 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1069,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <a href="https://www.rfc-editor.org/rfc/rfc4271" class="eref">4271</a> (if approved)</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-11-01" class="published">1 November 2025</time>
+<time datetime="2025-11-03" class="published">3 November 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-05-05">5 May 2026</time></dd>
+<dd class="expires"><time datetime="2026-05-07">7 May 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1091,8 +1091,8 @@ svg :is([fill="white"], [fill^="#fff"]) {
 Yet, the BGP Origin attribute has high priority in the best route
 selection algorithm, right after the AS Path length, and it's being used
 inconsistently over the Internet to manipulate the route preference.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
-<p id="section-abstract-2">This document updates RFC 4271 by making the BGP Origin attribute half-optional
-and explicitly allowing its scrubbing to zero (IGP).<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document updates RFC 4271 and RFC 7606 by making the BGP Origin attribute
+half-optional and explicitly allowing its scrubbing to zero (IGP).<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1129,7 +1129,7 @@ and explicitly allowing its scrubbing to zero (IGP).<a href="#section-abstract-2
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 5 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1177,7 +1177,15 @@ and explicitly allowing its scrubbing to zero (IGP).<a href="#section-abstract-2
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
             <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
@@ -1194,7 +1202,33 @@ and explicitly allowing its scrubbing to zero (IGP).<a href="#section-abstract-2
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">TODO Introduction<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-1">Origins of the BGP Origin attribute stem from times when BGP was not the only
+full internet routing protocol, and was slowly replacing EGP (<span>[<a href="#RFC904" class="cite xref">RFC904</a>]</span>). First
+seen in the first published BGP draft as the Direction field in the UPDATE
+message (see <span><a href="https://rfc-editor.org/rfc/rfc1105#section-3.4" class="relref">Section 3.4</a> of [<a href="#RFC1105" class="cite xref">RFC1105</a>]</span>), later refined into the
+Origin attribute (see <span><a href="https://rfc-editor.org/rfc/rfc1163#section-5" class="relref">Section 5</a> of [<a href="#RFC1163" class="cite xref">RFC1163</a>]</span>)
+with just three values: IGP, EGP and Incomplete.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">While the attribute itself has been long established, even in 1995 in <span>[<a href="#RFC1771" class="cite xref">RFC1771</a>]</span>,
+it is not being formally specified to be used for best route selection. Instead,
+using the origin attribute was suggested in <span>[<a href="#RFC1772" class="cite xref">RFC1772</a>]</span> to be used
+as an indicator of better route, together with AS Path Length and more criteria.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">It's hard to dig through the archives to find out what happened when and why,
+but it's safe to assume that most of the BGP implementations of that time
+simply used a very similar tie breaking algorithm without formal specification,
+as documented e.g. in <span>[<a href="#bird-bgp-commit" class="cite xref">bird-bgp-commit</a>]</span>. With that, the tie breaking in its
+current form, specified in <span><a href="https://rfc-editor.org/rfc/rfc4271#section-9.1.2.2" class="relref">Section 9.1.2.2</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>, was most probably
+simply copied from the existing stuff out there.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">In the year 2006, there might still have been some remnants of EGP infrastructure,
+and deprecating the BGP Origin attribute altogether wasn't probably a good idea then.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">In September 2025, a short look <span>[<a href="#rewriting-bgp-origin" class="cite xref">rewriting-bgp-origin</a>]</span> into the global routing table
+shows that about 9% of the DFZ routing table bears BGP Origin value INCOMPLETE
+and under 1% there are still some routes with BGP Origin value EGP. With these routes,
+several transit providers rewrite the BGP Origin value to IGP to raise their priority
+in the best route selection. Rather curiously, there are even several IPv6
+routes with BGP Origin value EGP.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">Therefore, this document makes the first needed steps to deprecate the BGP
+Origin attribute in the future by updating the rules for its origination
+and relaxing its handling.<a href="#section-1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1214,12 +1248,12 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-tolerance-of-missing-or-mal" class="section-name selfRef">Tolerance of missing or malformed BGP Origin attribute</a>
       </h2>
 <p id="section-3-1">Unless explicitly configured by a network operator to do otherwise,
-if the ORIGIN attribute has an undefined value, BGP speakers <span class="bcp14">SHOULD</span>
-replace it by a value of 0 (IGP).<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">BGP speakers <span class="bcp14">SHOULD NOT</span> generate UPDATE Message Errors with the subcode 6,
-Invalid ORIGIN Attribute.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">Per the above specification, this document updates <span><a href="https://rfc-editor.org/rfc/rfc4271#section-4.5" class="relref">Section 4.5</a> of [<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>
-by accepting routes without the ORIGIN attribute.<a href="#section-3-3" class="pilcrow">¶</a></p>
+if the ORIGIN attribute is malformed or absent, BGP speakers <span class="bcp14">SHOULD</span>
+accept such UPDATE message and replace the ORIGIN attribute
+by a value of 0 (IGP).<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">Per the above specification, this document updates
+<span><a href="https://rfc-editor.org/rfc/rfc7606#section-7.1" class="relref">Section 7.1</a> of [<a href="#RFC7606" class="cite xref">RFC7606</a>]</span>
+by accepting routes with a malformed ORIGIN attribute.<a href="#section-3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="update-to-the-bgp-origin-attribute-values">
@@ -1245,7 +1279,10 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
       <h2 id="name-security-considerations">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-5-1">TODO Security<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">Originating a route with a non-zero value of the ORIGIN attribute makes
+the route prone to unwanted prioritization by the intermediate AS's, and all the
+results achievable by manipulating this attribute may be instead achieved
+by techniques like AS Path Stuffing or setting the <code>MULTI_EXIT_DISC</code> attribute.<a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1256,25 +1293,73 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
 <p id="section-6-1">This document has no IANA actions.<a href="#section-6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="sec-normative-references">
+<div id="sec-combined-references">
 <section id="section-7">
-      <h2 id="name-normative-references">
-<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
+<div id="sec-normative-references">
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
 <dl class="references">
 <dt id="RFC2119">[RFC2119]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4271">[RFC4271]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Rekhter, Y., Ed.</span>, <span class="refAuthor">Li, T., Ed.</span>, and <span class="refAuthor">S. Hares, Ed.</span>, <span class="refTitle">"A Border Gateway Protocol 4 (BGP-4)"</span>, <span class="seriesInfo">RFC 4271</span>, <span class="seriesInfo">DOI 10.17487/RFC4271</span>, <time datetime="2006-01" class="refDate">January 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4271">https://www.rfc-editor.org/rfc/rfc4271</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC7606">[RFC7606]</dt>
+        <dd>
+<span class="refAuthor">Chen, E., Ed.</span>, <span class="refAuthor">Scudder, J., Ed.</span>, <span class="refAuthor">Mohapatra, P.</span>, and <span class="refAuthor">K. Patel</span>, <span class="refTitle">"Revised Error Handling for BGP UPDATE Messages"</span>, <span class="seriesInfo">RFC 7606</span>, <span class="seriesInfo">DOI 10.17487/RFC7606</span>, <time datetime="2015-08" class="refDate">August 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7606">https://www.rfc-editor.org/rfc/rfc7606</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-    <dd>
+      <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="bird-bgp-commit">[bird-bgp-commit]</dt>
+        <dd>
+<span class="refAuthor">Mareš, M.</span>, <span class="refTitle">"BIRD commit: adding real comparison of BGP routes (inspired by the Cisco one)"</span>, <time datetime="2000-04-17" class="refDate">17 April 2000</time>, <span>&lt;<a href="https://gitlab.nic.cz/labs/bird/-/commit/56a2bed46bf7713cd773b0fd0c097bcfc6345cc1">https://gitlab.nic.cz/labs/bird/-/commit/56a2bed46bf7713cd773b0fd0c097bcfc6345cc1</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="rewriting-bgp-origin">[rewriting-bgp-origin]</dt>
+        <dd>
+<span class="refAuthor">Bensley, J.</span>, <span class="refTitle">"Rewriting BGP Origin"</span>, <time datetime="2025-10-22" class="refDate">22 October 2025</time>, <span>&lt;<a href="https://ripe91.ripe.net/programme/meeting-plan/sessions/30/GJ8PFJ/">https://ripe91.ripe.net/programme/meeting-plan/sessions/30/GJ8PFJ/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1105">[RFC1105]</dt>
+        <dd>
+<span class="refAuthor">Lougheed, K.</span> and <span class="refAuthor">Y. Rekhter</span>, <span class="refTitle">"Border Gateway Protocol (BGP)"</span>, <span class="seriesInfo">RFC 1105</span>, <span class="seriesInfo">DOI 10.17487/RFC1105</span>, <time datetime="1989-06" class="refDate">June 1989</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1105">https://www.rfc-editor.org/rfc/rfc1105</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1163">[RFC1163]</dt>
+        <dd>
+<span class="refAuthor">Lougheed, K.</span> and <span class="refAuthor">Y. Rekhter</span>, <span class="refTitle">"Border Gateway Protocol (BGP)"</span>, <span class="seriesInfo">RFC 1163</span>, <span class="seriesInfo">DOI 10.17487/RFC1163</span>, <time datetime="1990-06" class="refDate">June 1990</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1163">https://www.rfc-editor.org/rfc/rfc1163</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1771">[RFC1771]</dt>
+        <dd>
+<span class="refAuthor">Rekhter, Y.</span> and <span class="refAuthor">T. Li</span>, <span class="refTitle">"A Border Gateway Protocol 4 (BGP-4)"</span>, <span class="seriesInfo">RFC 1771</span>, <span class="seriesInfo">DOI 10.17487/RFC1771</span>, <time datetime="1995-03" class="refDate">March 1995</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1771">https://www.rfc-editor.org/rfc/rfc1771</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1772">[RFC1772]</dt>
+        <dd>
+<span class="refAuthor">Rekhter, Y.</span> and <span class="refAuthor">P. Gross</span>, <span class="refTitle">"Application of the Border Gateway Protocol in the Internet"</span>, <span class="seriesInfo">RFC 1772</span>, <span class="seriesInfo">DOI 10.17487/RFC1772</span>, <time datetime="1995-03" class="refDate">March 1995</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1772">https://www.rfc-editor.org/rfc/rfc1772</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC904">[RFC904]</dt>
+      <dd>
+<span class="refAuthor">Mills, D.</span>, <span class="refTitle">"Exterior Gateway Protocol formal specification"</span>, <span class="seriesInfo">RFC 904</span>, <span class="seriesInfo">DOI 10.17487/RFC0904</span>, <time datetime="1984-04" class="refDate">April 1984</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc904">https://www.rfc-editor.org/rfc/rfc904</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="acknowledgments">
@@ -1282,7 +1367,9 @@ deprecating ORIGIN attribute values 1 (EGP) and 2 (INCOMPLETE), and
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">TODO acknowledge.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">The authors wish to thank James Bensley, Gert Doering, Wolfgang Tremmel,
+Ondřej Zajíček, and Alexander Zubkov for valuable comments, suggestions and
+discussions on the topic and text of the document.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
