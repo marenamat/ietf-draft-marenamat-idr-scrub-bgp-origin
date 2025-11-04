@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-02T01:18:59.823470+00:00",
+  "timestamp": "2025-11-04T01:14:53.689001+00:00",
   "repo": "marenamat/ietf-draft-marenamat-idr-scrub-bgp-origin",
   "labels": [
     {
@@ -50,5 +50,89 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOQNO3686xOIND",
+      "title": "Update ORIGIN attribute handling",
+      "url": "https://github.com/marenamat/ietf-draft-marenamat-idr-scrub-bgp-origin/pull/1",
+      "state": "OPEN",
+      "author": "user318",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hi. I propose to update the origin attribute handling. There are comments following for this update and also related thoughts.\r\n\r\nThe idea is that BGP speakers compliant to new RFC could live in a world where the attribute is absent at all. But they should be able to interoperate with legacy speakers for now. We might need request an option to be able to turn off adding of the attribute.\r\n\r\nAlso, as I understand, RFC7606 7.1 rules handling of malformed attribute - for example with bad length. It seems that it not good idea to accept such malformed attributes.\r\n\r\nNext question I have is \"undefined value\" of the attribute - it is actually not quite obvious what that means, I haven't found a definition of it yet. It could be either an absent attribute, or an attribute with the value out of scope of defined values (or even both options). I also suggest to further specify what \"undefined value\" (I prefer the second option). It also seems sensible to include the warning for using undefined values in security section, because those could cause undefined behaviour in legacy BGP speakers.",
+      "createdAt": "2025-11-03T16:03:48Z",
+      "updatedAt": "2025-11-03T19:44:45Z",
+      "baseRepository": "marenamat/ietf-draft-marenamat-idr-scrub-bgp-origin",
+      "baseRefName": "main",
+      "baseRefOid": "4b587977dd2895ed166edf15379b5d65334f20ac",
+      "headRepository": "user318/ietf-draft-marenamat-idr-scrub-bgp-origin",
+      "headRefName": "main",
+      "headRefOid": "1baa485b2e0979917a87c1222aeb79fba4cf3bc9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "marenamat",
+          "authorAssociation": "OWNER",
+          "body": "with all of that, gonna push an update for review soon",
+          "createdAt": "2025-11-03T17:26:49Z",
+          "updatedAt": "2025-11-03T17:26:49Z"
+        },
+        {
+          "author": "user318",
+          "authorAssociation": "NONE",
+          "body": "> explicitly saying that one may refrain from sending ORIGINs at all\r\n\r\nYes, at this point in time it is not the desired behaviour, but I think we should already incorporate such possibility now. Maybe it should be given in such way, that the speaker SHOULD (or MUST) add ORIGING by default, but there MUST be a configuration knob to switch that behaviour.",
+          "createdAt": "2025-11-03T17:37:00Z",
+          "updatedAt": "2025-11-03T17:37:00Z"
+        },
+        {
+          "author": "user318",
+          "authorAssociation": "NONE",
+          "body": "I've checked the update. My idea was that malformed attribute must not be accepted as before. Because some legacy implementations might fail on receiving an attribute with incorrect length, and even when receiving \"undefined\" values. And there is no reason in scope of this document to accept malformed attributes, at least with incorrect length.",
+          "createdAt": "2025-11-03T18:29:55Z",
+          "updatedAt": "2025-11-03T18:29:55Z"
+        },
+        {
+          "author": "marenamat",
+          "authorAssociation": "OWNER",
+          "body": "i think it's well covered by the SHOULD there, so that the implementation may say \"we'll accept everything but incorrect length is a no-go because of some internals\" \u2192 and considering that the same sentence says \"you replace anything weird by a zero\", i think there is no opportunity for this to actually cause any more problems at all",
+          "createdAt": "2025-11-03T18:58:18Z",
+          "updatedAt": "2025-11-03T18:58:18Z"
+        },
+        {
+          "author": "user318",
+          "authorAssociation": "NONE",
+          "body": "> i think it's well covered by the SHOULD there, so that the implementation may say \"we'll accept everything but incorrect length is a no-go because of some internals\" \u2192 and considering that the same sentence says \"you replace anything weird by a zero\", i think there is no opportunity for this to actually cause any more problems at all\r\n\r\nYes, but I mean more not local internals, but some other speaker that will receive it further. If we start passing something bad to it, it could break.\r\n\r\nBut current definition states that if we accept such announce, we rewrite it to 0, so there should not be \"transitive\" problems because of that. But there can be other class of problems when routes currently treated as withdrawn would be considered normal. All that of course requires some specific situations and configuration, but who know what lives there in the wild.\r\n\r\nOnly thing that concerns me, that we equalize here broken (invalid lenght), unspecified values (other than 0,1,2), and absent attribute. Sounds like they need to be treated the same way, when I would allow them to be treated differently. IMHO, I would kept broken as forbidden, would legitimized unspecified for internal usage, and would legitimized absent.",
+          "createdAt": "2025-11-03T19:36:49Z",
+          "updatedAt": "2025-11-03T19:36:49Z"
+        },
+        {
+          "author": "user318",
+          "authorAssociation": "NONE",
+          "body": "As I written in e-mail. I'm pro for the throwing off the current attribute semantics, but leaving it for those who use it somehow. I.e. the attribute becomes optional, and recommended to be scrubbed to 0 for interoperability. But we scrub it only for interoperability, i.e. for legacy speakers to be able to talk with us, we do not use it in standard decision making procedures.",
+          "createdAt": "2025-11-03T19:44:45Z",
+          "updatedAt": "2025-11-03T19:44:45Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOQNO3687LYU1B",
+          "commit": {
+            "abbreviatedOid": "1baa485"
+          },
+          "author": "marenamat",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "I'm not so happy with explicitly saying that one may refrain from sending ORIGINs at all (even though it is kinda implicit from the text) but I hope that I see clearly what you want to do with the tolerance section, gonna incorporate that.\r\n\r\nI'm OK with changing the MAY to SHOULD in case of rewriting.",
+          "createdAt": "2025-11-03T17:26:28Z",
+          "updatedAt": "2025-11-03T17:26:28Z",
+          "comments": []
+        }
+      ]
+    }
+  ]
 }
